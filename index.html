@@ -19,9 +19,10 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--void);color:var(
 #lang:hover{color:var(--text);border-color:var(--ember)}
 #lang:focus-visible{outline:2px solid var(--ember);outline-offset:3px}
 #mark{margin:0;font:800 26px/1 "Bricolage Grotesque",var(--body);letter-spacing:-.02em}
-.sr{position:fixed;z-index:1;left:28px;bottom:20px;display:flex;gap:18px}
+/* Keyboard and screen-reader route to the works; not shown */
+.sr{position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden}
 .sr button{all:unset;cursor:pointer;color:var(--soft);font-size:14px}
-.sr button:hover{color:var(--text)}
+.sr:focus-within{left:28px;bottom:20px;top:auto;width:auto;height:auto;display:flex;gap:18px;z-index:1}
 button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--ember);outline-offset:3px}
 #scrim{position:fixed;inset:0;z-index:3;background:rgba(2,2,5,.55);opacity:0;pointer-events:none;transition:opacity .4s}
 #scrim.on{opacity:1;pointer-events:auto}
@@ -62,12 +63,13 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 #p3{background:#07070b;color:#f4efe5;overflow:hidden}
 #p3>p{color:#bdb8ae}
 .live{display:flex;align-items:flex-end;gap:18px;margin:4px 0 22px;border-top:1px solid #22242d;padding-top:18px}
-.live-wrap{position:relative;display:inline-block;overflow:hidden;min-width:1.3ch}
-.big{display:block;font:800 clamp(72px,11vw,118px)/.9 "Bricolage Grotesque",var(--body);color:var(--ember);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
-.big.out{position:absolute;left:0;top:0;animation:flipOut .5s cubic-bezier(.4,0,.2,1) both}
-.big.in{animation:flipIn .55s cubic-bezier(.22,1,.36,1) both}
-@keyframes flipOut{from{transform:none;opacity:1}to{transform:translateY(-100%);opacity:0}}
-@keyframes flipIn{from{transform:translateY(100%);opacity:0}40%{opacity:1}to{transform:none;opacity:1}}
+.live-wrap{position:relative;display:inline-block;overflow:hidden;min-width:1.3ch;line-height:1}
+.big{display:block;font:800 clamp(72px,11vw,118px)/1 "Bricolage Grotesque",var(--body);color:var(--ember);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+/* Slot-machine change: the old number leaves upward and fades out fast, the new one rises in; they never overlap */
+.big.out{position:absolute;left:0;top:0;animation:flipOut .32s cubic-bezier(.4,0,.2,1) both}
+.big.in{animation:flipIn .5s cubic-bezier(.22,1,.36,1) both}
+@keyframes flipOut{from{transform:none;opacity:1}60%{opacity:0}to{transform:translateY(-110%);opacity:0}}
+@keyframes flipIn{from{transform:translateY(110%);opacity:0}30%{opacity:0}to{transform:none;opacity:1}}
 .live-side{display:flex;flex-direction:column;min-width:0;padding-bottom:10px;color:#bdb8ae;font-size:15px}
 .live-side b{font-weight:500;color:var(--text);font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nums{display:flex;flex-wrap:wrap;gap:8px}
@@ -261,11 +263,11 @@ function liveRender(){const t=T[lang];liveTitle.textContent=t.items[LIVE.at-1];
  [...numsEl.children].forEach((b,i)=>{const n=i+1;b.setAttribute('aria-pressed',LIVE.targets.has(n));b.classList.toggle('now',n===LIVE.at);b.classList.toggle('done',LIVE.done.has(n))});
  document.getElementById('live-hint').textContent=LIVE.targets.size?t.picked(LIVE.targets.size):t.pick}
 function liveStep(){const prev=LIVE.at;LIVE.at=LIVE.at%12+1;if(LIVE.at===1)LIVE.done.clear();
- if(!reduce){const o=liveNum.cloneNode(true);o.classList.add('out');o.textContent=prev;liveWrap.append(o);o.addEventListener('animationend',()=>o.remove());liveNum.classList.remove('in');void liveNum.offsetWidth;liveNum.classList.add('in')}
+ if(!reduce){liveWrap.querySelectorAll('.out').forEach(n=>n.remove());const o=document.createElement('span');o.className='big out';o.textContent=prev;liveWrap.append(o);o.addEventListener('animationend',()=>o.remove());liveNum.classList.remove('in');void liveNum.offsetWidth;liveNum.classList.add('in')}
  liveNum.textContent=LIVE.at;
  if(LIVE.targets.has(LIVE.at)){LIVE.done.add(LIVE.at);const t=T[lang];document.getElementById('wx-body').innerHTML=`${t.wxRoom}<br>${t.wxProduct(LIVE.at,t.items[LIVE.at-1])}<br><em>${t.wxStatus}</em>`;wx.classList.add('on');clearTimeout(LIVE.wxTimer);LIVE.wxTimer=setTimeout(()=>wx.classList.remove('on'),2600)}
  liveRender()}
-function liveStart(){liveStop();liveRender();LIVE.timer=setInterval(liveStep,1700)}
+function liveStart(){liveStop();liveRender();LIVE.timer=setInterval(liveStep,2400)}
 function liveStop(){clearInterval(LIVE.timer);LIVE.timer=0;wx.classList.remove('on')}
 for(let n=1;n<=12;n++){const b=document.createElement('button');b.textContent=n;b.addEventListener('click',()=>{if(LIVE.targets.has(n))LIVE.targets.delete(n);else LIVE.targets.add(n);LIVE.done.delete(n);liveRender()});numsEl.append(b)}
 function tick(ms){
