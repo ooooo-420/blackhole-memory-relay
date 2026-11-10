@@ -58,11 +58,36 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .task.done i{background:#e7b66b}
 .task.done span{text-decoration:line-through;opacity:.55}
 #count{font:900 40px/1 var(--body);color:#e7b66b;margin:18px 0 0}
-@media (max-width:640px){.talk{grid-template-columns:minmax(0,1fr)}}
+/* 直播蹲蹲：夜色琥珀，和小程序同一套 */
+#p3{background:#07070b;color:#f4efe5;overflow:hidden}
+#p3>p{color:#bdb8ae}
+.live{display:flex;align-items:flex-end;gap:18px;margin:4px 0 22px;border-top:1px solid #22242d;padding-top:18px}
+.live-wrap{position:relative;display:inline-block;overflow:hidden;min-width:1.3ch}
+.big{display:block;font:800 clamp(72px,11vw,118px)/.9 "Bricolage Grotesque",var(--body);color:var(--ember);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.big.out{position:absolute;left:0;top:0;animation:flipOut .5s cubic-bezier(.4,0,.2,1) both}
+.big.in{animation:flipIn .55s cubic-bezier(.22,1,.36,1) both}
+@keyframes flipOut{from{transform:none;opacity:1}to{transform:translateY(-100%);opacity:0}}
+@keyframes flipIn{from{transform:translateY(100%);opacity:0}40%{opacity:1}to{transform:none;opacity:1}}
+.live-side{display:flex;flex-direction:column;min-width:0;padding-bottom:10px;color:#bdb8ae;font-size:15px}
+.live-side b{font-weight:500;color:var(--text);font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nums{display:flex;flex-wrap:wrap;gap:8px}
+.nums button{all:unset;box-sizing:border-box;cursor:pointer;min-width:44px;height:40px;padding:0 12px;display:grid;place-items:center;border:1px solid #22242d;color:#bdb8ae;font:500 16px/1 "Bricolage Grotesque",var(--body);font-variant-numeric:tabular-nums;transition:border-color .15s,color .15s,background .15s,transform .1s}
+.nums button:hover{border-color:#4a4740;color:var(--text)}
+.nums button:active{transform:scale(.95)}
+.nums button[aria-pressed=true]{border-color:var(--ember);color:var(--ember)}
+.nums button.done{opacity:.4;text-decoration:line-through}
+.nums button.now{background:var(--ember);border-color:var(--ember);color:#1c1206;opacity:1;text-decoration:none}
+.hint{margin:16px 0 0;font-size:14px;color:#807c75}
+/* The WeChat card lives to the right of the live number, where a phone would be */
+.wx{margin-left:auto;align-self:center;width:min(300px,42%);flex:none;background:#f4efe5;color:#1c1206;padding:12px 14px 14px;font-size:14px;line-height:1.5;box-shadow:0 24px 60px rgba(0,0,0,.6);translate:0 -14px;opacity:0;transition:opacity .35s,translate .35s cubic-bezier(.22,1,.36,1)}
+.wx.on{opacity:1;translate:0 0}
+.wx b{display:block;font-weight:500;font-size:13px;color:#6b665d;margin-bottom:6px}
+.wx em{font-style:normal;color:#b2581a}
+@media (max-width:640px){.talk{grid-template-columns:minmax(0,1fr)}.live{flex-wrap:wrap}.wx{width:100%;margin:12px 0 0}}
 </style>
-<canvas id="gl" role="img" aria-label="黑洞和三個作品的名字。點名字，或把黑洞拖到名字上"></canvas>
+<canvas id="gl" role="img" aria-label="黑洞和四個作品的名字。點名字，或把黑洞拖到名字上"></canvas>
 <div id="top"><p id="mark">wuu</p><button id="lang"></button></div>
-<nav class="sr" aria-label="作品"><button data-open="0">記憶中轉站</button><button data-open="1">簡歷製作台</button><button data-open="2">個人中控台</button></nav>
+<nav class="sr" aria-label="作品"><button data-open="3">直播蹲蹲</button><button data-open="0">記憶中轉站</button><button data-open="1">簡歷製作台</button><button data-open="2">個人中控台</button></nav>
 <div id="scrim"></div>
 
 <section class="panel" id="p0" role="dialog" aria-label="記憶中轉站">
@@ -91,6 +116,15 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 <button class="task"><i></i><span>閱讀行業資料 · 09:30</span></button><button class="task"><i></i><span>跟進示例投遞 · 14:00</span></button><button class="task"><i></i><span>複盤示例項目 · 17:00</span></button>
 <p id="count">0 / 3</p><p class="note">示例資料</p>
 <a class="link" href="https://ooooo-420.github.io/wuu-workbench/projects/personal/">完整展示</a>
+</section>
+
+<section class="panel" id="p3" role="dialog" aria-label="直播蹲蹲">
+<button class="x" aria-label="關閉"><svg viewBox="0 0 18 18"><path d="M2 2l14 14M16 2L2 16"/></svg></button>
+<h2>講到你要的那一號，微信叫你</h2><p>直播間一兩百件商品，主播講到幾號得一直盯著。在手機上設好號碼，到了就通知。點幾個號碼試試：</p>
+<div class="live"><span class="live-wrap"><span class="big" id="live-num">1</span></span><div class="live-side"><span id="live-label">號 講解中</span><b id="live-title"></b></div><div class="wx" id="wx" role="status"><b id="wx-title">直播商品提醒</b><span id="wx-body"></span></div></div>
+<div class="nums" id="nums" role="group" aria-label="商品號碼"></div>
+<p class="hint" id="live-hint"></p>
+<a class="link" href="https://github.com/ooooo-420/live-dundun">GitHub 上的程式碼</a>
 </section>
 <script>
 const VS=`attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}`;
@@ -154,7 +188,8 @@ void main(){
  c=c/(1.+.25*c);c=pow(c,vec3(.92));
  gl_FragColor=vec4(c,1.);
 }`;
-const WORKS=[{name:'記憶中轉站',x:.25,y:.27},{name:'簡歷製作台',x:.72,y:.45},{name:'個人中控台',x:.33,y:.76}];
+/* The newest work is the only name in ember, and the black hole's idle wander passes closest to it, so its light bends first. */
+const WORKS=[{name:'記憶中轉站',x:.25,y:.27},{name:'簡歷製作台',x:.72,y:.45},{name:'個人中控台',x:.33,y:.76},{name:'直播蹲蹲',x:.70,y:.20,hot:true}];
 const cv=document.getElementById('gl'),gl=cv.getContext('webgl',{antialias:false,alpha:false,powerPreference:'high-performance'});
 function sh(t,s){const x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(x));return x}
 const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VS));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);gl.useProgram(pr);
@@ -167,7 +202,7 @@ const tc=document.createElement('canvas'),tx=tc.getContext('2d');
 let scale=.8,slow=0,last=0,hover=-1,lang='tc';
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 function paint(){const w=Math.min(1920,innerWidth*1.2),h=w*innerHeight/innerWidth;tc.width=w;tc.height=h;tx.clearRect(0,0,w,h);tx.textBaseline='middle';tx.textAlign='center';const fs=lang==="en"?Math.min(w*.058,h*.13):Math.min(w*.075,h*.15);tx.font=`900 ${fs}px ${lang==="sc"?'"Noto Sans SC","Microsoft YaHei"':'"Noto Sans TC","Microsoft JhengHei"'},sans-serif`;
- const a=innerWidth/innerHeight;for(const k of WORKS){tx.fillStyle=WORKS[hover]===k?'#ffb56b':'#f7f0e0';tx.fillText(k.name,k.x*w,k.y*h);const tw=tx.measureText(k.name).width/w*a,fh=fs/h;const cx=(k.x-.5)*a,cy=.5-k.y;k.r=[cx-tw/2-.015,cy-fh*.62,cx+tw/2+.015,cy+fh*.62]}
+ const a=innerWidth/innerHeight;for(const k of WORKS){tx.fillStyle=k.hot?(WORKS[hover]===k?'#ffd9b0':'#ffb56b'):WORKS[hover]===k?'#ffb56b':'#f7f0e0';tx.fillText(k.name,k.x*w,k.y*h);const tw=tx.measureText(k.name).width/w*a,fh=fs/h;const cx=(k.x-.5)*a,cy=.5-k.y;k.r=[cx-tw/2-.015,cy-fh*.62,cx+tw/2+.015,cy+fh*.62]}
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,tc)}
 function resize(){cv.width=Math.round(innerWidth*scale);cv.height=Math.round(innerHeight*scale);gl.viewport(0,0,cv.width,cv.height);gl.uniform2f(uRes,cv.width,cv.height);paint()}
 addEventListener('resize',resize);
@@ -187,12 +222,12 @@ cv.addEventListener('pointerdown',e=>{if(S.mode!=='free')return;const p=toP(e);
 const drop=()=>{if(S.drag){S.drag=false;cv.style.cursor='grab'}};
 addEventListener('pointerup',drop);addEventListener('pointercancel',drop);
 function begin(i){if(S.mode!=='free')return;S.drag=false;setHover(-1);cv.style.cursor='default';S.mode='go';S.target=i;S.at=performance.now();const k=WORKS[i];S.aim=[(k.r[0]+k.r[2])/2,(k.r[1]+k.r[3])/2-.02];gl.uniform4f(uRgn,...k.r)}
-const panels=[0,1,2].map(i=>document.getElementById('p'+i));const scrim=document.getElementById('scrim');
+const panels=[0,1,2,3].map(i=>document.getElementById('p'+i));const scrim=document.getElementById('scrim');
 const holePx=()=>[innerWidth/2+S.hole[0]*innerHeight,innerHeight/2-S.hole[1]*innerHeight];
 function openPanel(i){const el=panels[i];el.classList.add('on');scrim.classList.add('on');const [x,y]=holePx(),r=el.getBoundingClientRect(),dx=x-(r.left+r.width/2),dy=y-(r.top+r.height/2);
  if(!reduce)el.animate([{transform:`translate(${dx}px,${dy}px) scale(.02) rotate(200deg)`,opacity:.2},{transform:'none',opacity:1}],{duration:750,easing:'cubic-bezier(.16,1,.3,1)'});
- S.mode='open'}
-function closePanel(){if(S.mode!=='open')return;const el=panels[S.target];S.mode='out';scrim.classList.remove('on');const [x,y]=holePx(),r=el.getBoundingClientRect(),dx=x-(r.left+r.width/2),dy=y-(r.top+r.height/2);
+ S.mode='open';if(i===3)liveStart()}
+function closePanel(){if(S.mode!=='open')return;const el=panels[S.target];S.mode='out';scrim.classList.remove('on');liveStop();const [x,y]=holePx(),r=el.getBoundingClientRect(),dx=x-(r.left+r.width/2),dy=y-(r.top+r.height/2);
  const done=()=>{el.classList.remove('on');S.at=performance.now();S.mode='back'};
  if(reduce)return done();el.animate([{transform:'none',opacity:1},{transform:`translate(${dx}px,${dy}px) scale(.02) rotate(-200deg)`,opacity:.2}],{duration:420,easing:'cubic-bezier(.6,0,.9,.4)'}).onfinish=done}
 scrim.addEventListener('click',closePanel);addEventListener('keydown',e=>{if(e.key==='Escape')closePanel()});
@@ -210,11 +245,25 @@ function role(i){curRole=i;roleBtns.forEach((b,n)=>b.setAttribute('aria-pressed'
 roleBtns.forEach((b,i)=>b.addEventListener('click',()=>role(i)));
 /* workbench demo */
 document.querySelectorAll('.task').forEach(b=>b.addEventListener('click',()=>{b.classList.toggle('done');document.getElementById('count').textContent=document.querySelectorAll('.task.done').length+' / 3'}));
+/* live demo: the host walks through 12 products; pick numbers and a WeChat card arrives when the host gets there */
+const LIVE={at:1,targets:new Set(),done:new Set(),timer:0,wxTimer:0};
+const numsEl=document.getElementById('nums'),liveNum=document.getElementById('live-num'),liveWrap=liveNum.parentElement,liveTitle=document.getElementById('live-title'),wx=document.getElementById('wx');
+function liveRender(){const t=T[lang];liveTitle.textContent=t.items[LIVE.at-1];
+ [...numsEl.children].forEach((b,i)=>{const n=i+1;b.setAttribute('aria-pressed',LIVE.targets.has(n));b.classList.toggle('now',n===LIVE.at);b.classList.toggle('done',LIVE.done.has(n))});
+ document.getElementById('live-hint').textContent=LIVE.targets.size?t.picked(LIVE.targets.size):t.pick}
+function liveStep(){const prev=LIVE.at;LIVE.at=LIVE.at%12+1;if(LIVE.at===1)LIVE.done.clear();
+ if(!reduce){const o=liveNum.cloneNode(true);o.classList.add('out');o.textContent=prev;liveWrap.append(o);o.addEventListener('animationend',()=>o.remove());liveNum.classList.remove('in');void liveNum.offsetWidth;liveNum.classList.add('in')}
+ liveNum.textContent=LIVE.at;
+ if(LIVE.targets.has(LIVE.at)){LIVE.done.add(LIVE.at);const t=T[lang];document.getElementById('wx-body').innerHTML=`${t.wxRoom}<br>${t.wxProduct(LIVE.at,t.items[LIVE.at-1])}<br><em>${t.wxStatus}</em>`;wx.classList.add('on');clearTimeout(LIVE.wxTimer);LIVE.wxTimer=setTimeout(()=>wx.classList.remove('on'),2600)}
+ liveRender()}
+function liveStart(){liveStop();liveRender();LIVE.timer=setInterval(liveStep,1700)}
+function liveStop(){clearInterval(LIVE.timer);LIVE.timer=0;wx.classList.remove('on')}
+for(let n=1;n<=12;n++){const b=document.createElement('button');b.textContent=n;b.addEventListener('click',()=>{if(LIVE.targets.has(n))LIVE.targets.delete(n);else LIVE.targets.add(n);LIVE.done.delete(n);liveRender()});numsEl.append(b)}
 function tick(ms){
  const dt=ms-last;last=ms;if(dt>30&&dt<400)slow++;else slow=Math.max(0,slow-1);if(slow>25&&scale>.45){scale-=.13;slow=0;resize()}
  const a=innerWidth/innerHeight;
  if(S.mode==='free'){
-  if(!S.moved&&!reduce)S.aim=[Math.sin(ms*.00035)*.26*a,Math.sin(ms*.00052)*.04-.02];
+  if(!S.moved&&!reduce)S.aim=[.06*a+Math.sin(ms*.00035)*.3*a,Math.sin(ms*.00052)*.09-.01];
   if(S.drag&&S.armed){WORKS.forEach((k,i)=>{if(overWord(S.hole,k,.01))begin(i)})}
   if(!S.armed&&!WORKS.some(k=>overWord(S.hole,k,.06)))S.armed=true;
  }
@@ -228,15 +277,18 @@ function tick(ms){
  gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(tick);
 }
 const T={
-tc:{badge:'繁',html:'zh-Hant',title:'wuu 作品集',switchTo:'切換語言，目前是繁體中文',canvas:'黑洞和三個作品的名字。點名字，或把黑洞拖到名字上',close:'關閉',names:['記憶中轉站','簡歷製作台','個人中控台'],pos:[[.25,.27],[.72,.45],[.33,.76]],
+tc:{badge:'繁',html:'zh-Hant',title:'wuu 作品集',switchTo:'切換語言，目前是繁體中文',canvas:'黑洞和四個作品的名字。點名字，或把黑洞拖到名字上',close:'關閉',names:['記憶中轉站','簡歷製作台','個人中控台','直播蹲蹲'],pos:[[.25,.27],[.72,.45],[.33,.76],[.70,.20]],
+ h3:'講到你要的那一號，微信叫你',p3:'直播間一兩百件商品，主播講到幾號得一直盯著。在手機上設好號碼，到了就通知。點幾個號碼試試：',label3:'號 講解中',pick:'點上面的號碼，就是你要搶的那幾件。',picked:n=>`盯著 ${n} 件。主播講到時，號碼旁邊會收到微信。`,items:['牛仔外套','連帽衛衣','寬鬆長褲','針織開衫','白色球鞋','帆布托特包','羊毛圍巾','棒球帽','格紋襯衫','短款羽絨','工裝短褲','皮革腰帶'],wxTitle:'直播商品提醒',wxRoom:'直播間：示例直播間',wxProduct:(n,s)=>`商品：${n}號 ${s}`,wxStatus:'正在講解，快去搶',l3:'GitHub 上的程式碼',
  h0:'換一個 AI，不用再講一遍',p0:'我同時用 Claude Code 和 Codex，這個工具讓它們共用進度。你試試：',say:'對 Claude Code 說的話',first:'幫我把報告改成三頁',send:'送出',go:'換到 Codex',n0:'這裡是模擬。真正的版本用 Hook 自動保存，在你下一句話時交給另一邊。',l0:'GitHub 上的程式碼',ok:'好，開始處理。',ask:'接著做？',reply:s=>`我看到你剛才在 Claude Code 說「${s}」，已經開始處理了。我接著做。`,
  h1:'同一段經歷，投不同崗位',p1:'簡歷製作台從真實作品裡找證據，不編造。選一個崗位看看：',src:'原文：按區域拆分收入，核對合併範圍，比較客戶結構，形成業務與風險分析。',roles:[['PE/VC','財務與業務核驗','核對項目收入的合併範圍，按區域拆解業務構成，結合客戶結構形成風險分析，供項目討論使用。'],['FA','項目材料與比較分析','按區域與客戶結構組織業務數據，標注不同口徑，形成項目介紹與比較分析材料。'],['戰略分析','業務結構與風險判斷','拆解不同區域及客戶的收入構成，識別口徑差異，整理業務結構與風險判斷依據。']],sample:'示例資料',full:'完整展示',
  h2:'今天要做什麼，打開就知道',p2:'安排、投遞和項目都在一處，一條記錄只寫一次。',tasks:['閱讀行業資料 · 09:30','跟進示例投遞 · 14:00','複盤示例項目 · 17:00']},
-sc:{badge:'简',html:'zh-Hans',title:'wuu 作品集',switchTo:'切换语言，当前是简体中文',canvas:'黑洞和三个作品的名字。点名字，或把黑洞拖到名字上',close:'关闭',names:['记忆中转站','简历制作台','个人中控台'],pos:[[.25,.27],[.72,.45],[.33,.76]],
+sc:{badge:'简',html:'zh-Hans',title:'wuu 作品集',switchTo:'切换语言，当前是简体中文',canvas:'黑洞和四个作品的名字。点名字，或把黑洞拖到名字上',close:'关闭',names:['记忆中转站','简历制作台','个人中控台','直播蹲蹲'],pos:[[.25,.27],[.72,.45],[.33,.76],[.70,.20]],
+ h3:'讲到你要的那一号，微信叫你',p3:'直播间一两百件商品，主播讲到几号得一直盯着。在手机上设好号码，到了就通知。点几个号码试试：',label3:'号 讲解中',pick:'点上面的号码，就是你要抢的那几件。',picked:n=>`盯着 ${n} 件。主播讲到时，号码旁边会收到微信。`,items:['牛仔外套','连帽卫衣','宽松长裤','针织开衫','白色球鞋','帆布托特包','羊毛围巾','棒球帽','格纹衬衫','短款羽绒','工装短裤','皮革腰带'],wxTitle:'直播商品提醒',wxRoom:'直播间：示例直播间',wxProduct:(n,s)=>`商品：${n}号 ${s}`,wxStatus:'正在讲解，快去抢',l3:'GitHub 上的代码',
  h0:'换一个 AI，不用再讲一遍',p0:'我同时用 Claude Code 和 Codex，这个工具让它们共用进度。你试试：',say:'对 Claude Code 说的话',first:'帮我把报告改成三页',send:'发送',go:'换到 Codex',n0:'这里是模拟。真正的版本用 Hook 自动保存，在你下一句话时交给另一边。',l0:'GitHub 上的代码',ok:'好，开始处理。',ask:'接着做？',reply:s=>`我看到你刚才在 Claude Code 说“${s}”，已经开始处理了。我接着做。`,
  h1:'同一段经历，投不同岗位',p1:'简历制作台从真实作品里找证据，不编造。选一个岗位看看：',src:'原文：按区域拆分收入，核对合并范围，比较客户结构，形成业务与风险分析。',roles:[['PE/VC','财务与业务核验','核对项目收入的合并范围，按区域拆解业务构成，结合客户结构形成风险分析，供项目讨论使用。'],['FA','项目材料与比较分析','按区域与客户结构组织业务数据，标注不同口径，形成项目介绍与比较分析材料。'],['战略分析','业务结构与风险判断','拆解不同区域及客户的收入构成，识别口径差异，整理业务结构与风险判断依据。']],sample:'示例数据',full:'完整展示',
  h2:'今天要做什么，打开就知道',p2:'安排、投递和项目都在一处，一条记录只写一次。',tasks:['阅读行业资料 · 09:30','跟进示例投递 · 14:00','复盘示例项目 · 17:00']},
-en:{badge:'En',html:'en',title:'wuu portfolio',switchTo:'Change language, currently English',canvas:'A black hole and three project names. Click a name, or drag the black hole onto it.',close:'Close',names:['Memory Relay','Resume Studio','Personal Hub'],pos:[[.25,.26],[.69,.47],[.34,.75]],
+en:{badge:'En',html:'en',title:'wuu portfolio',switchTo:'Change language, currently English',canvas:'A black hole and four project names. Click a name, or drag the black hole onto it.',close:'Close',names:['Memory Relay','Resume Studio','Personal Hub','Live Dundun'],pos:[[.25,.26],[.69,.47],[.34,.75],[.70,.19]],
+ h3:'When the host reaches your number, WeChat tells you',p3:'A live-shopping room lists a hundred products and you have to watch until yours comes up. Set the numbers on your phone and get a message when the host gets there. Pick a few:',label3:'is up',pick:'Tap the numbers you want to grab.',picked:n=>`Watching ${n}. A WeChat card appears beside the number when the host reaches one.`,items:['Denim jacket','Hoodie','Wide-leg trousers','Knit cardigan','White sneakers','Canvas tote','Wool scarf','Baseball cap','Check shirt','Short puffer','Cargo shorts','Leather belt'],wxTitle:'Live product alert',wxRoom:'Room: sample room',wxProduct:(n,s)=>`Product: No. ${n} ${s}`,wxStatus:'Being explained now. Go!',l3:'Code on GitHub',
  h0:'Switch AIs without repeating yourself',p0:'I use both Claude Code and Codex. This tool lets them share progress. Try it:',say:'Message to Claude Code',first:'Cut my report down to three pages',send:'Send',go:'Switch to Codex',n0:'This is a simulation. The real version saves automatically through hooks and hands over on your next message.',l0:'Code on GitHub',ok:'On it.',ask:'Can you pick this up?',reply:s=>`I can see you told Claude Code "${s}" and that it has started. I'll take it from here.`,
  h1:'One experience, different roles',p1:'Resume Studio finds evidence in real work and never invents it. Pick a role:',src:'Source: Split revenue by region, checked the consolidation scope, compared customer mix, and wrote a business and risk analysis.',roles:[['PE/VC','Financial and business verification','Checked the consolidation scope of project revenue, broke the business down by region, and used customer mix to build a risk analysis for investment discussions.'],['FA','Project materials and comparisons','Organized business data by region and customer mix, flagged differences in reporting basis, and produced project introductions and comparison materials.'],['Strategy','Business structure and risk','Broke revenue down by region and customer, identified differences in reporting basis, and assembled the evidence for business structure and risk judgments.']],sample:'Sample data',full:'Full showcase',
  h2:'Open it and know what today needs',p2:'Schedule, applications and projects in one place. Each record is written once.',tasks:['Read industry reports · 09:30','Follow up on sample application · 14:00','Review sample project · 17:00']}};
@@ -245,7 +297,8 @@ function setLang(l,save){lang=l;const t=T[l];document.documentElement.lang=t.htm
  const b=$('#lang');b.textContent=t.badge;b.setAttribute('aria-label',t.switchTo);b.title=t.switchTo;cv.setAttribute('aria-label',t.canvas);
  document.querySelectorAll('.x').forEach(x=>x.setAttribute('aria-label',t.close));
  WORKS.forEach((k,i)=>{k.name=t.names[i];k.x=t.pos[i][0];k.y=t.pos[i][1];$(`[data-open="${i}"]`).textContent=k.name;$('#p'+i).setAttribute('aria-label',k.name)});
- [['#p0 h2','h0'],['#p0>p','p0'],['#say button','send'],['#go','go'],['#p0 .note','n0'],['#p0 .link','l0'],['#p1 h2','h1'],['#p1>p','p1'],['.src','src'],['#p1 .note','sample'],['#p1 .link','full'],['#p2 h2','h2'],['#p2>p','p2'],['#p2 .note','sample'],['#p2 .link','full']].forEach(([s,k])=>{$(s).textContent=t[k]});
+ [['#p0 h2','h0'],['#p0>p','p0'],['#say button','send'],['#go','go'],['#p0 .note','n0'],['#p0 .link','l0'],['#p1 h2','h1'],['#p1>p','p1'],['.src','src'],['#p1 .note','sample'],['#p1 .link','full'],['#p2 h2','h2'],['#p2>p','p2'],['#p2 .note','sample'],['#p2 .link','full'],['#p3 h2','h3'],['#p3>p','p3'],['#live-label','label3'],['#wx-title','wxTitle'],['#p3 .link','l3']].forEach(([s,k])=>{$(s).textContent=t[k]});
+ liveRender();
  line.setAttribute('aria-label',t.say);line.value=t.first;saved='';left.replaceChildren();right.replaceChildren();go.disabled=true;
  roleBtns.forEach((n,i)=>{n.textContent=t.roles[i][0]});role(curRole);
  document.querySelectorAll('.task span').forEach((n,i)=>{n.textContent=t.tasks[i]});
