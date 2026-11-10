@@ -129,7 +129,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 <script>
 const VS=`attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}`;
 const FS=`precision highp float;
-uniform vec2 res,hole;uniform float R,t,pull;uniform vec4 rgn;uniform sampler2D tex;
+uniform vec2 res,hole;uniform float R,t,pull,reach;uniform vec4 rgn;uniform sampler2D tex;
 float hash(vec3 p){p=fract(p*.3183+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
 float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
  float a=fract(sin(dot(i,vec2(127.1,311.7)))*43758.5),b=fract(sin(dot(i+vec2(1,0),vec2(127.1,311.7)))*43758.5),c=fract(sin(dot(i+vec2(0,1),vec2(127.1,311.7)))*43758.5),d=fract(sin(dot(i+vec2(1,1),vec2(127.1,311.7)))*43758.5);
@@ -181,32 +181,41 @@ void main(){
  if(!cap){
   vec3 d=normalize(v)*T;
   bg=stars(d);
-  if(d.z>.03){vec2 s=hole+(d.xy/d.z)*2.*R;s=mix(p,s,smoothstep(5.2,1.7,length(l)));vec4 w=words(s);bg=mix(bg,w.rgb,w.a);}
+  if(d.z>.03){vec2 s=hole+(d.xy/d.z)*2.*R;s=mix(p,s,smoothstep(reach,reach*.33,length(l)));vec4 w=words(s);bg=mix(bg,w.rgb,w.a);}
  }
  vec3 c=col+(1.-alpha)*bg;
  float g=length(l);c+=vec3(1.,.55,.22)*.035/(1.+g*g*.6);
  c=c/(1.+.25*c);c=pow(c,vec3(.92));
  gl_FragColor=vec4(c,1.);
 }`;
-/* The newest work is the only name in ember, and the black hole's idle wander passes closest to it, so its light bends first. */
-const WORKS=[{name:'記憶中轉站',x:.25,y:.27},{name:'簡歷製作台',x:.72,y:.45},{name:'個人中控台',x:.33,y:.76},{name:'直播蹲蹲',x:.70,y:.20,hot:true}];
+/* Layout: a poster column on the left (the newest work biggest, one line under it, the rest smaller and dimmer),
+   the black hole on the right. Its lens pulls at the column's edge, so the words nearest it stretch toward it. */
+const WORKS=[{name:'記憶中轉站'},{name:'簡歷製作台'},{name:'個人中控台'},{name:'直播蹲蹲',hot:true}];
 const cv=document.getElementById('gl'),gl=cv.getContext('webgl',{antialias:false,alpha:false,powerPreference:'high-performance'});
 function sh(t,s){const x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(x));return x}
 const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VS));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);gl.useProgram(pr);
 gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
 const L=gl.getAttribLocation(pr,'a');gl.enableVertexAttribArray(L);gl.vertexAttribPointer(L,2,gl.FLOAT,false,0,0);
-const U=n=>gl.getUniformLocation(pr,n),uRes=U('res'),uHole=U('hole'),uR=U('R'),uT=U('t'),uPull=U('pull'),uRgn=U('rgn');
+const U=n=>gl.getUniformLocation(pr,n),uRes=U('res'),uHole=U('hole'),uR=U('R'),uT=U('t'),uPull=U('pull'),uRgn=U('rgn'),uReach=U('reach');
 gl.bindTexture(gl.TEXTURE_2D,gl.createTexture());
 gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
 const tc=document.createElement('canvas'),tx=tc.getContext('2d');
 let scale=.8,slow=0,last=0,hover=-1,lang='tc';
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function paint(){const w=Math.min(1920,innerWidth*1.2),h=w*innerHeight/innerWidth;tc.width=w;tc.height=h;tx.clearRect(0,0,w,h);tx.textBaseline='middle';tx.textAlign='center';const fs=lang==="en"?Math.min(w*.058,h*.13):Math.min(w*.075,h*.15);tx.font=`900 ${fs}px ${lang==="sc"?'"Noto Sans SC","Microsoft YaHei"':'"Noto Sans TC","Microsoft JhengHei"'},sans-serif`;
- const a=innerWidth/innerHeight;for(const k of WORKS){tx.fillStyle=k.hot?(WORKS[hover]===k?'#ffd9b0':'#ffb56b'):WORKS[hover]===k?'#ffb56b':'#f7f0e0';tx.fillText(k.name,k.x*w,k.y*h);const tw=tx.measureText(k.name).width/w*a,fh=fs/h;const cx=(k.x-.5)*a,cy=.5-k.y;k.r=[cx-tw/2-.015,cy-fh*.62,cx+tw/2+.015,cy+fh*.62]}
+const portrait=()=>innerWidth<innerHeight;
+function box(k,x,base,tw,fs,w,h,a){const cx=(x+tw/2)/w,cy=(base-fs*.36)/h,tww=tw/w*a,fh=fs*.95/h,px=(cx-.5)*a,py=.5-cy;k.r=[px-tww/2-.01,py-fh/2-.01,px+tww/2+.01,py+fh/2+.01]}
+function paint(){const w=Math.min(1920,innerWidth*1.2),h=w*innerHeight/innerWidth;tc.width=w;tc.height=h;tx.clearRect(0,0,w,h);tx.textBaseline='alphabetic';tx.textAlign='left';
+ const t=T[lang],a=innerWidth/innerHeight,po=portrait(),cjk=lang!=='en',fam=lang==='sc'?'"Noto Sans SC","Microsoft YaHei"':'"Noto Sans TC","Microsoft JhengHei"';
+ const big=po?(cjk?Math.min(w*.17,h*.09):Math.min(w*.12,h*.07)):Math.min(w*(cjk?.105:.085),h*.2);
+ const x0=w*(po?.08:.06);let y=(po?h*.13:h*.17)+big;
+ const hot=WORKS[3];tx.font=`900 ${big}px ${fam},sans-serif`;tx.fillStyle=hover===3?'#ffd9b0':'#ffb56b';tx.fillText(hot.name,x0,y);box(hot,x0,y,tx.measureText(hot.name).width,big,w,h,a);
+ const sub=Math.max(big*.15,po?w*.036:0);y+=big*.3+sub*.6;tx.font=`500 ${sub}px ${fam},sans-serif`;tx.fillStyle='#bdb8ae';tx.fillText(t.tag3,x0+big*.04,y);
+ const cols=['#f7f0e0','#d6d0c4','#8a847a'];
+ [0,1,2].forEach((i,n)=>{const k=WORKS[i],fs=big*(.4-n*.03);tx.font=`900 ${fs}px ${fam},sans-serif`;tx.fillStyle=hover===i?'#ffb56b':cols[n];y+=n?fs*1.28:big*.32+fs;tx.fillText(k.name,x0,y);box(k,x0,y,tx.measureText(k.name).width,fs,w,h,a)});
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,tc)}
-function resize(){cv.width=Math.round(innerWidth*scale);cv.height=Math.round(innerHeight*scale);gl.viewport(0,0,cv.width,cv.height);gl.uniform2f(uRes,cv.width,cv.height);paint()}
+function resize(){cv.width=Math.round(innerWidth*scale);cv.height=Math.round(innerHeight*scale);gl.viewport(0,0,cv.width,cv.height);gl.uniform2f(uRes,cv.width,cv.height);gl.uniform1f(uReach,portrait()?2.4:5.2);paint()}
 addEventListener('resize',resize);
-const S={mode:'free',hole:[0,-.02],aim:[0,-.02],R:.2,pull:0,target:-1,moved:false,armed:true,at:0,drag:false};
+const S={mode:'free',hole:[.27,-.03],aim:[.27,-.03],R:.2,pull:0,target:-1,moved:false,armed:true,at:0,drag:false};
 const toP=e=>[(e.clientX-innerWidth/2)/innerHeight,-(e.clientY-innerHeight/2)/innerHeight];
 const overWord=(p,k,m)=>p[0]>k.r[0]-m&&p[0]<k.r[2]+m&&p[1]>k.r[1]-m&&p[1]<k.r[3]+m;
 const onHole=p=>Math.hypot(p[0]-S.hole[0],p[1]-S.hole[1])<S.R*1.1;
@@ -263,7 +272,7 @@ function tick(ms){
  const dt=ms-last;last=ms;if(dt>30&&dt<400)slow++;else slow=Math.max(0,slow-1);if(slow>25&&scale>.45){scale-=.13;slow=0;resize()}
  const a=innerWidth/innerHeight;
  if(S.mode==='free'){
-  if(!S.moved&&!reduce)S.aim=[.06*a+Math.sin(ms*.00035)*.3*a,Math.sin(ms*.00052)*.09-.01];
+  if(!S.moved)S.aim=portrait()?[Math.sin(ms*.00035)*.05*a,-.36+Math.sin(ms*.00052)*.03]:[.3*a+Math.sin(ms*.00035)*.05*a,-.03+Math.sin(ms*.00052)*.1];
   if(S.drag&&S.armed){WORKS.forEach((k,i)=>{if(overWord(S.hole,k,.01))begin(i)})}
   if(!S.armed&&!WORKS.some(k=>overWord(S.hole,k,.06)))S.armed=true;
  }
@@ -277,17 +286,17 @@ function tick(ms){
  gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(tick);
 }
 const T={
-tc:{badge:'繁',html:'zh-Hant',title:'wuu 作品集',switchTo:'切換語言，目前是繁體中文',canvas:'黑洞和四個作品的名字。點名字，或把黑洞拖到名字上',close:'關閉',names:['記憶中轉站','簡歷製作台','個人中控台','直播蹲蹲'],pos:[[.25,.27],[.72,.45],[.33,.76],[.70,.20]],
+tc:{badge:'繁',html:'zh-Hant',title:'wuu 作品集',switchTo:'切換語言，目前是繁體中文',canvas:'黑洞和四個作品的名字。點名字，或把黑洞拖到名字上',close:'關閉',names:['記憶中轉站','簡歷製作台','個人中控台','直播蹲蹲'],tag3:'講到你要的那一號，微信叫你',
  h3:'講到你要的那一號，微信叫你',p3:'直播間一兩百件商品，主播講到幾號得一直盯著。在手機上設好號碼，到了就通知。點幾個號碼試試：',label3:'號 講解中',pick:'點上面的號碼，就是你要搶的那幾件。',picked:n=>`盯著 ${n} 件。主播講到時，號碼旁邊會收到微信。`,items:['牛仔外套','連帽衛衣','寬鬆長褲','針織開衫','白色球鞋','帆布托特包','羊毛圍巾','棒球帽','格紋襯衫','短款羽絨','工裝短褲','皮革腰帶'],wxTitle:'直播商品提醒',wxRoom:'直播間：示例直播間',wxProduct:(n,s)=>`商品：${n}號 ${s}`,wxStatus:'正在講解，快去搶',l3:'GitHub 上的程式碼',
  h0:'換一個 AI，不用再講一遍',p0:'我同時用 Claude Code 和 Codex，這個工具讓它們共用進度。你試試：',say:'對 Claude Code 說的話',first:'幫我把報告改成三頁',send:'送出',go:'換到 Codex',n0:'這裡是模擬。真正的版本用 Hook 自動保存，在你下一句話時交給另一邊。',l0:'GitHub 上的程式碼',ok:'好，開始處理。',ask:'接著做？',reply:s=>`我看到你剛才在 Claude Code 說「${s}」，已經開始處理了。我接著做。`,
  h1:'同一段經歷，投不同崗位',p1:'簡歷製作台從真實作品裡找證據，不編造。選一個崗位看看：',src:'原文：按區域拆分收入，核對合併範圍，比較客戶結構，形成業務與風險分析。',roles:[['PE/VC','財務與業務核驗','核對項目收入的合併範圍，按區域拆解業務構成，結合客戶結構形成風險分析，供項目討論使用。'],['FA','項目材料與比較分析','按區域與客戶結構組織業務數據，標注不同口徑，形成項目介紹與比較分析材料。'],['戰略分析','業務結構與風險判斷','拆解不同區域及客戶的收入構成，識別口徑差異，整理業務結構與風險判斷依據。']],sample:'示例資料',full:'完整展示',
  h2:'今天要做什麼，打開就知道',p2:'安排、投遞和項目都在一處，一條記錄只寫一次。',tasks:['閱讀行業資料 · 09:30','跟進示例投遞 · 14:00','複盤示例項目 · 17:00']},
-sc:{badge:'简',html:'zh-Hans',title:'wuu 作品集',switchTo:'切换语言，当前是简体中文',canvas:'黑洞和四个作品的名字。点名字，或把黑洞拖到名字上',close:'关闭',names:['记忆中转站','简历制作台','个人中控台','直播蹲蹲'],pos:[[.25,.27],[.72,.45],[.33,.76],[.70,.20]],
+sc:{badge:'简',html:'zh-Hans',title:'wuu 作品集',switchTo:'切换语言，当前是简体中文',canvas:'黑洞和四个作品的名字。点名字，或把黑洞拖到名字上',close:'关闭',names:['记忆中转站','简历制作台','个人中控台','直播蹲蹲'],tag3:'讲到你要的那一号，微信叫你',
  h3:'讲到你要的那一号，微信叫你',p3:'直播间一两百件商品，主播讲到几号得一直盯着。在手机上设好号码，到了就通知。点几个号码试试：',label3:'号 讲解中',pick:'点上面的号码，就是你要抢的那几件。',picked:n=>`盯着 ${n} 件。主播讲到时，号码旁边会收到微信。`,items:['牛仔外套','连帽卫衣','宽松长裤','针织开衫','白色球鞋','帆布托特包','羊毛围巾','棒球帽','格纹衬衫','短款羽绒','工装短裤','皮革腰带'],wxTitle:'直播商品提醒',wxRoom:'直播间：示例直播间',wxProduct:(n,s)=>`商品：${n}号 ${s}`,wxStatus:'正在讲解，快去抢',l3:'GitHub 上的代码',
  h0:'换一个 AI，不用再讲一遍',p0:'我同时用 Claude Code 和 Codex，这个工具让它们共用进度。你试试：',say:'对 Claude Code 说的话',first:'帮我把报告改成三页',send:'发送',go:'换到 Codex',n0:'这里是模拟。真正的版本用 Hook 自动保存，在你下一句话时交给另一边。',l0:'GitHub 上的代码',ok:'好，开始处理。',ask:'接着做？',reply:s=>`我看到你刚才在 Claude Code 说“${s}”，已经开始处理了。我接着做。`,
  h1:'同一段经历，投不同岗位',p1:'简历制作台从真实作品里找证据，不编造。选一个岗位看看：',src:'原文：按区域拆分收入，核对合并范围，比较客户结构，形成业务与风险分析。',roles:[['PE/VC','财务与业务核验','核对项目收入的合并范围，按区域拆解业务构成，结合客户结构形成风险分析，供项目讨论使用。'],['FA','项目材料与比较分析','按区域与客户结构组织业务数据，标注不同口径，形成项目介绍与比较分析材料。'],['战略分析','业务结构与风险判断','拆解不同区域及客户的收入构成，识别口径差异，整理业务结构与风险判断依据。']],sample:'示例数据',full:'完整展示',
  h2:'今天要做什么，打开就知道',p2:'安排、投递和项目都在一处，一条记录只写一次。',tasks:['阅读行业资料 · 09:30','跟进示例投递 · 14:00','复盘示例项目 · 17:00']},
-en:{badge:'En',html:'en',title:'wuu portfolio',switchTo:'Change language, currently English',canvas:'A black hole and four project names. Click a name, or drag the black hole onto it.',close:'Close',names:['Memory Relay','Resume Studio','Personal Hub','Live Dundun'],pos:[[.25,.26],[.69,.47],[.34,.75],[.70,.19]],
+en:{badge:'En',html:'en',title:'wuu portfolio',switchTo:'Change language, currently English',canvas:'A black hole and four project names. Click a name, or drag the black hole onto it.',close:'Close',names:['Memory Relay','Resume Studio','Personal Hub','Live Dundun'],tag3:'When the host reaches your number, WeChat tells you',
  h3:'When the host reaches your number, WeChat tells you',p3:'A live-shopping room lists a hundred products and you have to watch until yours comes up. Set the numbers on your phone and get a message when the host gets there. Pick a few:',label3:'is up',pick:'Tap the numbers you want to grab.',picked:n=>`Watching ${n}. A WeChat card appears beside the number when the host reaches one.`,items:['Denim jacket','Hoodie','Wide-leg trousers','Knit cardigan','White sneakers','Canvas tote','Wool scarf','Baseball cap','Check shirt','Short puffer','Cargo shorts','Leather belt'],wxTitle:'Live product alert',wxRoom:'Room: sample room',wxProduct:(n,s)=>`Product: No. ${n} ${s}`,wxStatus:'Being explained now. Go!',l3:'Code on GitHub',
  h0:'Switch AIs without repeating yourself',p0:'I use both Claude Code and Codex. This tool lets them share progress. Try it:',say:'Message to Claude Code',first:'Cut my report down to three pages',send:'Send',go:'Switch to Codex',n0:'This is a simulation. The real version saves automatically through hooks and hands over on your next message.',l0:'Code on GitHub',ok:'On it.',ask:'Can you pick this up?',reply:s=>`I can see you told Claude Code "${s}" and that it has started. I'll take it from here.`,
  h1:'One experience, different roles',p1:'Resume Studio finds evidence in real work and never invents it. Pick a role:',src:'Source: Split revenue by region, checked the consolidation scope, compared customer mix, and wrote a business and risk analysis.',roles:[['PE/VC','Financial and business verification','Checked the consolidation scope of project revenue, broke the business down by region, and used customer mix to build a risk analysis for investment discussions.'],['FA','Project materials and comparisons','Organized business data by region and customer mix, flagged differences in reporting basis, and produced project introductions and comparison materials.'],['Strategy','Business structure and risk','Broke revenue down by region and customer, identified differences in reporting basis, and assembled the evidence for business structure and risk judgments.']],sample:'Sample data',full:'Full showcase',
@@ -296,13 +305,13 @@ const ORDER=['tc','sc','en'],$=s=>document.querySelector(s);
 function setLang(l,save){lang=l;const t=T[l];document.documentElement.lang=t.html;document.title=t.title;
  const b=$('#lang');b.textContent=t.badge;b.setAttribute('aria-label',t.switchTo);b.title=t.switchTo;cv.setAttribute('aria-label',t.canvas);
  document.querySelectorAll('.x').forEach(x=>x.setAttribute('aria-label',t.close));
- WORKS.forEach((k,i)=>{k.name=t.names[i];k.x=t.pos[i][0];k.y=t.pos[i][1];$(`[data-open="${i}"]`).textContent=k.name;$('#p'+i).setAttribute('aria-label',k.name)});
+ WORKS.forEach((k,i)=>{k.name=t.names[i];$(`[data-open="${i}"]`).textContent=k.name;$('#p'+i).setAttribute('aria-label',k.name)});
  [['#p0 h2','h0'],['#p0>p','p0'],['#say button','send'],['#go','go'],['#p0 .note','n0'],['#p0 .link','l0'],['#p1 h2','h1'],['#p1>p','p1'],['.src','src'],['#p1 .note','sample'],['#p1 .link','full'],['#p2 h2','h2'],['#p2>p','p2'],['#p2 .note','sample'],['#p2 .link','full'],['#p3 h2','h3'],['#p3>p','p3'],['#live-label','label3'],['#wx-title','wxTitle'],['#p3 .link','l3']].forEach(([s,k])=>{$(s).textContent=t[k]});
  liveRender();
  line.setAttribute('aria-label',t.say);line.value=t.first;saved='';left.replaceChildren();right.replaceChildren();go.disabled=true;
  roleBtns.forEach((n,i)=>{n.textContent=t.roles[i][0]});role(curRole);
  document.querySelectorAll('.task span').forEach((n,i)=>{n.textContent=t.tasks[i]});
- paint();if(document.fonts)document.fonts.load(l==='sc'?'900 60px "Noto Sans SC"':'900 60px "Noto Sans TC"',t.names.join('')).then(paint).catch(()=>{});
+ paint();if(document.fonts)Promise.all([document.fonts.load(l==='sc'?'900 60px "Noto Sans SC"':'900 60px "Noto Sans TC"',t.names.join('')),document.fonts.load(l==='sc'?'500 20px "Noto Sans SC"':'500 20px "Noto Sans TC"',t.tag3)]).then(paint).catch(()=>{});
  if(save)try{localStorage.setItem('wuu-lang',l)}catch(e){}}
 function firstLang(){try{const s=localStorage.getItem('wuu-lang');if(T[s])return s}catch(e){}
  const n=(navigator.language||'').toLowerCase();if(!n.startsWith('zh'))return 'en';return /hans|cn|sg/.test(n)?'sc':'tc'}
