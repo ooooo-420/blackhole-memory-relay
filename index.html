@@ -61,6 +61,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 /* 直播蹲蹲：夜色琥珀，和小程序同一套 */
 #p3{background:#07070b;color:#f4efe5;overflow:hidden}
 #p3>p{color:#bdb8ae}
+/* Formal name used on the résumé; the cover keeps the self-explanatory 直播蹲蹲 */
+.alias{margin:0 0 10px;font:500 14px/1.4 var(--body);color:var(--ember)}
 .live{display:flex;align-items:flex-end;gap:18px;margin:4px 0 22px;border-top:1px solid #22242d;padding-top:18px}
 .live-wrap{position:relative;display:inline-block;overflow:hidden;min-width:1.3ch;line-height:1}
 .big{display:block;font:800 clamp(72px,11vw,118px)/1 "Bricolage Grotesque",var(--body);color:var(--ember);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
@@ -121,7 +123,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 
 <section class="panel" id="p3" role="dialog" aria-label="直播蹲蹲">
 <button class="x" aria-label="關閉"><svg viewBox="0 0 18 18"><path d="M2 2l14 14M16 2L2 16"/></svg></button>
-<h2>講到你要的那一號，微信叫你</h2><p>直播間一兩百件商品，主播講到幾號得一直盯著。在手機上設好號碼，到了就通知。點幾個號碼試試：</p>
+<div class="alias" id="alias3">正式名稱：目候</div><h2>講到你要的那一號，微信叫你</h2><p>直播間一兩百件商品，主播講到幾號得一直盯著。在手機上設好號碼，到了就通知。點幾個號碼試試：</p>
 <div class="live"><span class="live-wrap"><span class="big" id="live-num">1</span></span><div class="live-side"><span id="live-label">號 講解中</span><b id="live-title"></b></div><div class="wx" id="wx" role="status"><b id="wx-title">直播商品提醒</b><span id="wx-body"></span></div></div>
 <div class="nums" id="nums" role="group" aria-label="商品號碼"></div>
 <p class="hint" id="live-hint"></p>
@@ -306,17 +308,17 @@ function tick(ms){
  gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(tick);
 }
 const T={
-tc:{badge:'繁',html:'zh-Hant',title:'wuu 作品集',switchTo:'切換語言，目前是繁體中文',canvas:'黑洞和四個作品的名字。點名字，或把黑洞拖到名字上',close:'關閉',names:['記憶中轉站','簡歷製作台','個人中控台','直播蹲蹲'],tag3:'講到你要的那一號，微信叫你',
+tc:{badge:'繁',html:'zh-Hant',title:'wuu 作品集',switchTo:'切換語言，目前是繁體中文',canvas:'黑洞和四個作品的名字。點名字，或把黑洞拖到名字上',close:'關閉',names:['記憶中轉站','簡歷製作台','個人中控台','直播蹲蹲'],tag3:'講到你要的那一號，微信叫你',alias3:'正式名稱：目候',
  h3:'講到你要的那一號，微信叫你',p3:'直播間一兩百件商品，主播講到幾號得一直盯著。在手機上設好號碼，到了就通知。點幾個號碼試試：',label3:'號 講解中',pick:'點上面的號碼，就是你要搶的那幾件。',picked:n=>`盯著 ${n} 件。主播講到時，號碼旁邊會收到微信。`,items:['牛仔外套','連帽衛衣','寬鬆長褲','針織開衫','白色球鞋','帆布托特包','羊毛圍巾','棒球帽','格紋襯衫','短款羽絨','工裝短褲','皮革腰帶'],wxTitle:'直播商品提醒',wxRoom:'直播間：示例直播間',wxProduct:(n,s)=>`商品：${n}號 ${s}`,wxStatus:'正在講解，快去搶',l3:'GitHub 上的程式碼',
  h0:'換一個 AI，不用再講一遍',p0:'我同時用 Claude Code 和 Codex，這個工具讓它們共用進度。你試試：',say:'對 Claude Code 說的話',first:'幫我把報告改成三頁',send:'送出',go:'換到 Codex',n0:'這裡是模擬。真正的版本用 Hook 自動保存，在你下一句話時交給另一邊。',l0:'GitHub 上的程式碼',ok:'好，開始處理。',ask:'接著做？',reply:s=>`我看到你剛才在 Claude Code 說「${s}」，已經開始處理了。我接著做。`,
  h1:'同一段經歷，投不同崗位',p1:'簡歷製作台從真實作品裡找證據，不編造。選一個崗位看看：',src:'原文：按區域拆分收入，核對合併範圍，比較客戶結構，形成業務與風險分析。',roles:[['PE/VC','財務與業務核驗','核對項目收入的合併範圍，按區域拆解業務構成，結合客戶結構形成風險分析，供項目討論使用。'],['FA','項目材料與比較分析','按區域與客戶結構組織業務數據，標注不同口徑，形成項目介紹與比較分析材料。'],['戰略分析','業務結構與風險判斷','拆解不同區域及客戶的收入構成，識別口徑差異，整理業務結構與風險判斷依據。']],sample:'示例資料',full:'完整展示',
  h2:'今天要做什麼，打開就知道',p2:'安排、投遞和項目都在一處，一條記錄只寫一次。',tasks:['閱讀行業資料 · 09:30','跟進示例投遞 · 14:00','複盤示例項目 · 17:00']},
-sc:{badge:'简',html:'zh-Hans',title:'wuu 作品集',switchTo:'切换语言，当前是简体中文',canvas:'黑洞和四个作品的名字。点名字，或把黑洞拖到名字上',close:'关闭',names:['记忆中转站','简历制作台','个人中控台','直播蹲蹲'],tag3:'讲到你要的那一号，微信叫你',
+sc:{badge:'简',html:'zh-Hans',title:'wuu 作品集',switchTo:'切换语言，当前是简体中文',canvas:'黑洞和四个作品的名字。点名字，或把黑洞拖到名字上',close:'关闭',names:['记忆中转站','简历制作台','个人中控台','直播蹲蹲'],tag3:'讲到你要的那一号，微信叫你',alias3:'正式名称：目候',
  h3:'讲到你要的那一号，微信叫你',p3:'直播间一两百件商品，主播讲到几号得一直盯着。在手机上设好号码，到了就通知。点几个号码试试：',label3:'号 讲解中',pick:'点上面的号码，就是你要抢的那几件。',picked:n=>`盯着 ${n} 件。主播讲到时，号码旁边会收到微信。`,items:['牛仔外套','连帽卫衣','宽松长裤','针织开衫','白色球鞋','帆布托特包','羊毛围巾','棒球帽','格纹衬衫','短款羽绒','工装短裤','皮革腰带'],wxTitle:'直播商品提醒',wxRoom:'直播间：示例直播间',wxProduct:(n,s)=>`商品：${n}号 ${s}`,wxStatus:'正在讲解，快去抢',l3:'GitHub 上的代码',
  h0:'换一个 AI，不用再讲一遍',p0:'我同时用 Claude Code 和 Codex，这个工具让它们共用进度。你试试：',say:'对 Claude Code 说的话',first:'帮我把报告改成三页',send:'发送',go:'换到 Codex',n0:'这里是模拟。真正的版本用 Hook 自动保存，在你下一句话时交给另一边。',l0:'GitHub 上的代码',ok:'好，开始处理。',ask:'接着做？',reply:s=>`我看到你刚才在 Claude Code 说“${s}”，已经开始处理了。我接着做。`,
  h1:'同一段经历，投不同岗位',p1:'简历制作台从真实作品里找证据，不编造。选一个岗位看看：',src:'原文：按区域拆分收入，核对合并范围，比较客户结构，形成业务与风险分析。',roles:[['PE/VC','财务与业务核验','核对项目收入的合并范围，按区域拆解业务构成，结合客户结构形成风险分析，供项目讨论使用。'],['FA','项目材料与比较分析','按区域与客户结构组织业务数据，标注不同口径，形成项目介绍与比较分析材料。'],['战略分析','业务结构与风险判断','拆解不同区域及客户的收入构成，识别口径差异，整理业务结构与风险判断依据。']],sample:'示例数据',full:'完整展示',
  h2:'今天要做什么，打开就知道',p2:'安排、投递和项目都在一处，一条记录只写一次。',tasks:['阅读行业资料 · 09:30','跟进示例投递 · 14:00','复盘示例项目 · 17:00']},
-en:{badge:'En',html:'en',title:'wuu portfolio',switchTo:'Change language, currently English',canvas:'A black hole and four project names. Click a name, or drag the black hole onto it.',close:'Close',names:['Memory Relay','Resume Studio','Personal Hub','Live Dundun'],tag3:'When the host reaches your number, WeChat tells you',
+en:{badge:'En',html:'en',title:'wuu portfolio',switchTo:'Change language, currently English',canvas:'A black hole and four project names. Click a name, or drag the black hole onto it.',close:'Close',names:['Memory Relay','Resume Studio','Personal Hub','Live Dundun'],tag3:'When the host reaches your number, WeChat tells you',alias3:'Formal name: Muhou (目候)',
  h3:'When the host reaches your number, WeChat tells you',p3:'A live-shopping room lists a hundred products and you have to watch until yours comes up. Set the numbers on your phone and get a message when the host gets there. Pick a few:',label3:'is up',pick:'Tap the numbers you want to grab.',picked:n=>`Watching ${n}. A WeChat card appears beside the number when the host reaches one.`,items:['Denim jacket','Hoodie','Wide-leg trousers','Knit cardigan','White sneakers','Canvas tote','Wool scarf','Baseball cap','Check shirt','Short puffer','Cargo shorts','Leather belt'],wxTitle:'Live product alert',wxRoom:'Room: sample room',wxProduct:(n,s)=>`Product: No. ${n} ${s}`,wxStatus:'Being explained now. Go!',l3:'Code on GitHub',
  h0:'Switch AIs without repeating yourself',p0:'I use both Claude Code and Codex. This tool lets them share progress. Try it:',say:'Message to Claude Code',first:'Cut my report down to three pages',send:'Send',go:'Switch to Codex',n0:'This is a simulation. The real version saves automatically through hooks and hands over on your next message.',l0:'Code on GitHub',ok:'On it.',ask:'Can you pick this up?',reply:s=>`I can see you told Claude Code "${s}" and that it has started. I'll take it from here.`,
  h1:'One experience, different roles',p1:'Resume Studio finds evidence in real work and never invents it. Pick a role:',src:'Source: Split revenue by region, checked the consolidation scope, compared customer mix, and wrote a business and risk analysis.',roles:[['PE/VC','Financial and business verification','Checked the consolidation scope of project revenue, broke the business down by region, and used customer mix to build a risk analysis for investment discussions.'],['FA','Project materials and comparisons','Organized business data by region and customer mix, flagged differences in reporting basis, and produced project introductions and comparison materials.'],['Strategy','Business structure and risk','Broke revenue down by region and customer, identified differences in reporting basis, and assembled the evidence for business structure and risk judgments.']],sample:'Sample data',full:'Full showcase',
@@ -326,7 +328,7 @@ function setLang(l,save){lang=l;const t=T[l];document.documentElement.lang=t.htm
  const b=$('#lang');b.textContent=t.badge;b.setAttribute('aria-label',t.switchTo);b.title=t.switchTo;cv.setAttribute('aria-label',t.canvas);
  document.querySelectorAll('.x').forEach(x=>x.setAttribute('aria-label',t.close));
  WORKS.forEach((k,i)=>{k.name=t.names[i];$(`[data-open="${i}"]`).textContent=T.en.names[i];$('#p'+i).setAttribute('aria-label',k.name)});
- [['#p0 h2','h0'],['#p0>p','p0'],['#say button','send'],['#go','go'],['#p0 .note','n0'],['#p0 .link','l0'],['#p1 h2','h1'],['#p1>p','p1'],['.src','src'],['#p1 .note','sample'],['#p1 .link','full'],['#p2 h2','h2'],['#p2>p','p2'],['#p2 .note','sample'],['#p2 .link','full'],['#p3 h2','h3'],['#p3>p','p3'],['#live-label','label3'],['#wx-title','wxTitle'],['#p3 .link','l3']].forEach(([s,k])=>{$(s).textContent=t[k]});
+ [['#p0 h2','h0'],['#p0>p','p0'],['#say button','send'],['#go','go'],['#p0 .note','n0'],['#p0 .link','l0'],['#p1 h2','h1'],['#p1>p','p1'],['.src','src'],['#p1 .note','sample'],['#p1 .link','full'],['#p2 h2','h2'],['#p2>p','p2'],['#p2 .note','sample'],['#p2 .link','full'],['#alias3','alias3'],['#p3 h2','h3'],['#p3>p','p3'],['#live-label','label3'],['#wx-title','wxTitle'],['#p3 .link','l3']].forEach(([s,k])=>{$(s).textContent=t[k]});
  liveRender();
  line.setAttribute('aria-label',t.say);line.value=t.first;saved='';left.replaceChildren();right.replaceChildren();go.disabled=true;
  roleBtns.forEach((n,i)=>{n.textContent=t.roles[i][0]});role(curRole);
