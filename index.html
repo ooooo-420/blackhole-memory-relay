@@ -305,9 +305,10 @@ function box(k,x,base,tw,fs,w,h,a){const cx=(x+tw/2)/w,cy=(base-fs*.36)/h,tww=tw
 function paint(){const w=Math.min(1920,innerWidth*1.2),h=w*innerHeight/innerWidth;tc.width=w;tc.height=h;tx.clearRect(0,0,w,h);tx.textBaseline='alphabetic';tx.textAlign='left';
  const t=T.en,a=innerWidth/innerHeight,po=portrait(),fam='"Noto Sans TC","Microsoft JhengHei"';
  const big=po?Math.min(w*.13,h*.075):Math.min(w*.085,h*.2);
- const x0=w*(po?.08:.06);let y=(po?h*.13:h*.2)+big;
+ const x0=w*(po?.08:.06);/* Desktop: centre the whole block (about 2.65 × big tall) on the screen so it sits level with the black hole */
+ let y=po?h*.13+big:(h-big*2.65)/2+big*.92;
  const hot=WORKS[3];tx.font=`900 ${big}px ${fam},sans-serif`;tx.fillStyle=hover===3?'#ffd9b0':'#ffb56b';tx.fillText(t.names[3],x0,y);box(hot,x0,y,tx.measureText(t.names[3]).width,big,w,h,a);
- const cols=['#f7f0e0','#d6d0c4','#8a847a'];
+ const cols=['#f7f0e0','#e2dccf','#c2bbad'];
  [0,1,2].forEach((i,n)=>{const k=WORKS[i],fs=big*(.4-n*.03);tx.font=`900 ${fs}px ${fam},sans-serif`;tx.fillStyle=hover===i?'#ffb56b':cols[n];y+=n?fs*1.28:big*.34+fs;tx.fillText(t.names[i],x0,y);box(k,x0,y,tx.measureText(t.names[i]).width,fs,w,h,a)});
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,tc)}
 function resize(){cv.width=Math.round(innerWidth*scale);cv.height=Math.round(innerHeight*scale);gl.viewport(0,0,cv.width,cv.height);gl.uniform2f(uRes,cv.width,cv.height);gl.uniform1f(uReach,portrait()?2.4:5.2);paint()}
@@ -319,11 +320,11 @@ const onHole=p=>Math.hypot(p[0]-S.hole[0],p[1]-S.hole[1])<S.R*1.1;
 const wordAt=p=>WORKS.findIndex(k=>overWord(p,k,0));
 function setHover(i){if(i!==hover){hover=i;paint()}}
 addEventListener('pointermove',e=>{const p=toP(e);
- if(S.drag){S.aim=p;return}
+ if(S.drag){S.aim=S.rest=p;return}
  if(S.mode!=='free'||e.target!==cv){setHover(-1);cv.style.cursor='default';return}
  const hole=onHole(p),i=hole?-1:wordAt(p);setHover(i);cv.style.cursor=hole?'grab':i>=0?'pointer':'default'});
 cv.addEventListener('pointerdown',e=>{if(S.mode!=='free')return;const p=toP(e);
- if(onHole(p)){S.drag=true;S.moved=true;S.aim=p;cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing';return}
+ if(onHole(p)){S.drag=true;S.moved=true;S.aim=S.rest=p;cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing';return}
  const i=wordAt(p);if(i>=0)begin(i)});
 const drop=()=>{if(S.drag){S.drag=false;cv.style.cursor='grab'}};
 addEventListener('pointerup',drop);addEventListener('pointercancel',drop);
@@ -399,7 +400,9 @@ function tick(ms){
  const dt=ms-last;last=ms;if(dt>30&&dt<400)slow++;else slow=Math.max(0,slow-1);if(slow>25&&scale>.45){scale-=.13;slow=0;resize()}
  const a=innerWidth/innerHeight;
  if(S.mode==='free'){
-  if(!S.moved)S.aim=portrait()?[Math.sin(ms*.00035)*.05*a,-.36+Math.sin(ms*.00052)*.03]:[.3*a+Math.sin(ms*.00035)*.05*a,-.03+Math.sin(ms*.00052)*.1];
+  if(!S.drag){const base=S.moved&&S.rest?S.rest:portrait()?[Math.sin(ms*.00035)*.05*a,-.36+Math.sin(ms*.00052)*.03]:[.3*a+Math.sin(ms*.00035)*.05*a,-.03+Math.sin(ms*.00052)*.1];
+   /* Pointing at a name makes the black hole lean toward it: the hint that names can be opened, without a caption */
+   if(hover>=0){const k=WORKS[hover],cx=(k.r[0]+k.r[2])/2,cy=(k.r[1]+k.r[3])/2;S.aim=[base[0]+(cx-base[0])*.2,base[1]+(cy-base[1])*.2]}else S.aim=base}
   if(S.drag&&S.armed){WORKS.forEach((k,i)=>{if(overWord(S.hole,k,.01))begin(i)})}
   if(!S.armed&&!WORKS.some(k=>overWord(S.hole,k,.06)))S.armed=true;
  }
